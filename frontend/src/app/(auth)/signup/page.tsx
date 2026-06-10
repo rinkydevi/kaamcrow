@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { CrowLogo } from "@/components/ui/CrowLogo";
 import { useState } from "react";
 
 const schema = z.object({
@@ -18,42 +19,6 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
-
-function CrowLogo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className={className}>
-      <path d="M8 40 L20 33 L16 43 L24 35 L18 47 L27 37 L21 49" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      <ellipse cx="38" cy="30" rx="18" ry="11"/>
-      <path d="M22 27 Q31 14 46 21" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <circle cx="59" cy="21" r="9"/>
-      <path d="M68 19 L77 21 L68 23 Z"/>
-      <circle cx="62" cy="20" r="2.5" fill="white"/>
-      <circle cx="62.5" cy="20" r="1.2" fill="#1a1a2e"/>
-      <path d="M43 41 L41 50 M41 50 L37 54 M41 50 L41 55 M41 50 L45 54" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-}
-
-function BackgroundCrow() {
-  return (
-    <svg
-      viewBox="0 0 400 260"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="currentColor"
-      className="auth-crow-bg text-crow-shimmer"
-      aria-hidden="true"
-    >
-      <path d="M40 200 L100 165 L80 215 L120 175 L90 235 L135 185 L105 245" stroke="currentColor" strokeWidth="7" fill="none" strokeLinecap="round"/>
-      <ellipse cx="190" cy="150" rx="90" ry="55"/>
-      <path d="M110 135 Q155 70 230 105" stroke="currentColor" strokeWidth="12" fill="none" strokeLinecap="round"/>
-      <circle cx="295" cy="105" r="45"/>
-      <path d="M340 95 L385 105 L340 115 Z"/>
-      <circle cx="310" cy="100" r="12" fill="white"/>
-      <circle cx="313" cy="100" r="6" fill="#1a1a2e"/>
-      <path d="M215 205 L205 250 M205 250 L185 270 M205 250 L205 275 M205 250 L225 270" stroke="currentColor" strokeWidth="7" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-}
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -76,73 +41,83 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4" style={{ background: "var(--crow-void)" }}>
-      {/* Background gradient blobs — actually visible */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-pink-500/25 blur-[130px]" />
-        <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-purple-600/30 blur-[120px]" />
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-800/20 blur-[80px]" />
-      </div>
+    <div
+      className="relative flex min-h-screen items-center justify-center p-4"
+      style={{ background: "rgb(var(--crow-bg))" }}
+    >
+      {/* Subtle crow silhouette */}
+      <svg
+        viewBox="0 0 400 260"
+        fill="currentColor"
+        className="auth-crow-bg text-crow-text"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <polygon points="72,128 144,108 144,148" />
+        <circle cx="204" cy="96" r="64" />
+        <path d="M144 152 C136 192 152 240 208 256 C256 272 312 232 320 184 C328 136 296 96 240 96 L204 144 Z" />
+        <path d="M160 192 Q216 152 288 160 Q224 200 160 224 Z" />
+        <path d="M312 192 L392 160 L400 200 L312 224 Z" />
+      </svg>
 
-      {/* Large decorative crow */}
-      <BackgroundCrow />
-
-      {/* Signup card */}
-      <div className="glass-card modal-gradient-border relative w-full max-w-sm rounded-2xl p-8">
-        {/* Logo + title */}
+      {/* Card */}
+      <div className="relative w-full max-w-sm">
+        {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-crow-shimmer/20 border border-crow-shimmer/40">
-            <CrowLogo className="h-9 w-9 text-crow-shimmer" />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-crow-border bg-crow-shadow">
+            <CrowLogo className="h-7 w-7 text-crow-text" />
           </div>
-          <h1 className="gradient-text text-3xl font-bold tracking-tight">KaamCrow</h1>
-          <p className="mt-2 text-sm italic text-crow-muted">Join the murder.</p>
+          <h1 className="text-2xl font-bold text-crow-text">KaamCrow</h1>
+          <p className="mt-1.5 text-sm text-crow-muted">Join the murder.</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {error && (
-            <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
+        {/* Form card */}
+        <div
+          className="rounded-2xl border border-crow-border p-6"
+          style={{ background: "rgb(var(--crow-surface))", boxShadow: "var(--crow-card-shadow)" }}
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            {error && (
+              <div className="rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-3 text-sm text-red-500">
+                {error}
+              </div>
+            )}
+            <Input
+              label="Email"
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              error={errors.email?.message}
+              {...register("email")}
+            />
+            <Input
+              label="Password"
+              id="password"
+              type="password"
+              placeholder="Min. 8 characters"
+              error={errors.password?.message}
+              {...register("password")}
+            />
+            <Input
+              label="Confirm Password"
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              error={errors.confirmPassword?.message}
+              {...register("confirmPassword")}
+            />
+            <Button type="submit" loading={isSubmitting} className="mt-1 w-full py-2.5 text-sm">
+              Create Account
+            </Button>
+          </form>
 
-          <Input
-            label="Email"
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            error={errors.email?.message}
-            {...register("email")}
-          />
-
-          <Input
-            label="Password"
-            id="password"
-            type="password"
-            placeholder="Min. 8 characters"
-            error={errors.password?.message}
-            {...register("password")}
-          />
-
-          <Input
-            label="Confirm Password"
-            id="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            error={errors.confirmPassword?.message}
-            {...register("confirmPassword")}
-          />
-
-          <Button type="submit" loading={isSubmitting} className="mt-2 w-full py-3 text-sm">
-            Create Account
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-crow-muted">
-          Already flying?{" "}
-          <Link href="/login" className="font-semibold text-crow-feather hover:text-crow-shimmer transition-colors duration-200">
-            Sign in
-          </Link>
-        </p>
+          <p className="mt-5 text-center text-sm text-crow-muted">
+            Already flying?{" "}
+            <Link href="/login" className="font-semibold text-crow-text hover:text-crow-feather transition-colors duration-150">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

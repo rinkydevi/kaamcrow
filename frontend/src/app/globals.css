@@ -3,273 +3,215 @@
 @tailwind utilities;
 
 /* ============================================
-   KAAMCROW — VIVID DUSK DESIGN SYSTEM
+   KAAMCROW — CLEAN MINIMAL DESIGN SYSTEM
+   Light & dark via CSS variable tokens
    ============================================ */
 
+/* ── Light mode (default) ── */
 :root {
-  --crow-void:    #0d0a1e;
-  --crow-abyss:   #150d2a;
-  --crow-shadow:  #1c1238;
-  --crow-border:  #2a1956;
-  --crow-muted:   #9284c4;
-  --crow-text:    #ece8ff;
-  --crow-feather: #c084fc;
-  --crow-shimmer: #f472b6;
-  --crow-wing:    #818cf8;
-  --crow-gold:    #fbbf24;
-  --crow-mint:    #34d399;
+  --crow-bg:       248 248 248;   /* #f8f8f8 */
+  --crow-surface:  255 255 255;   /* #ffffff */
+  --crow-surface2: 243 243 243;   /* #f3f3f3 */
+  --crow-border:   229 229 229;   /* #e5e5e5 */
+  --crow-muted:    136 136 136;   /* #888888 */
+  --crow-text:     17  17  17;    /* #111111 */
+  --crow-accent:   109 40  217;   /* #6d28d9 */
 
-  --gradient-start: #f472b6;
-  --gradient-mid:   #a855f7;
-  --gradient-end:   #818cf8;
-
-  --glow-feather: 0 0 24px rgba(192, 132, 252, 0.55);
-  --glow-shimmer: 0 0 24px rgba(244, 114, 182, 0.55);
-  --glow-wing:    0 0 24px rgba(129, 140, 248, 0.45);
-  --glow-gold:    0 0 24px rgba(251, 191, 36, 0.4);
+  --crow-header-bg: rgba(255, 255, 255, 0.9);
+  --crow-card-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  --crow-card-shadow-hover: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* ── Custom Scrollbar ── */
+/* ── Dark mode ── */
+.dark {
+  --crow-bg:       20  20  20;    /* #141414 */
+  --crow-surface:  30  30  30;    /* #1e1e1e */
+  --crow-surface2: 38  38  38;    /* #262626 */
+  --crow-border:   45  45  45;    /* #2d2d2d */
+  --crow-muted:    136 136 136;   /* #888888 */
+  --crow-text:     240 240 240;   /* #f0f0f0 */
+  --crow-accent:   168 85  247;   /* #a855f7 */
+
+  --crow-header-bg: rgba(20, 20, 20, 0.9);
+  --crow-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  --crow-card-shadow-hover: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── Scrollbar ── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--crow-feather) var(--crow-abyss);
+  scrollbar-color: rgb(var(--crow-border)) rgb(var(--crow-bg));
 }
-*::-webkit-scrollbar        { width: 5px; height: 5px; }
-*::-webkit-scrollbar-track  { background: var(--crow-abyss); }
-*::-webkit-scrollbar-thumb  { background: var(--crow-feather); border-radius: 99px; }
-*::-webkit-scrollbar-thumb:hover { background: var(--crow-shimmer); }
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track  { background: rgb(var(--crow-bg)); }
+*::-webkit-scrollbar-thumb  { background: rgb(var(--crow-border)); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: rgb(var(--crow-muted)); }
 
-/* ── Body — rich purple gradient, actually visible ── */
+/* ── Body ── */
 body {
-  background-color: var(--crow-void);
-  color: var(--crow-text);
-  background-image:
-    radial-gradient(ellipse at 15% 0%,  rgba(168, 85,  247, 0.22) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 10%, rgba(244, 114, 182, 0.16) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 90%, rgba(129, 140, 248, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 5%  70%, rgba(192, 132, 252, 0.12) 0%, transparent 40%);
+  background-color: rgb(var(--crow-bg));
+  color: rgb(var(--crow-text));
   min-height: 100vh;
 }
 
-/* ── Glass Card — distinctly purple-dark, not just dark ── */
+/* ── Task card — clean, no glassmorphism ── */
+.task-card {
+  background: rgb(var(--crow-surface));
+  border: 1px solid rgb(var(--crow-border));
+  border-radius: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-card:hover {
+  border-color: rgb(var(--crow-muted) / 0.5);
+  box-shadow: var(--crow-card-shadow-hover);
+}
+
+/* ── Glass card — used for modals (task form) ── */
 .glass-card {
-  background: rgba(21, 13, 42, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(192, 132, 252, 0.30);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(192, 132, 252, 0.07),
-    inset 0 1px 0 rgba(192, 132, 252, 0.18);
+  background: rgb(var(--crow-surface));
+  backdrop-filter: none;
+  border: 1px solid rgb(var(--crow-border));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
-.glass-card:hover {
-  border-color: rgba(192, 132, 252, 0.50);
-  box-shadow:
-    0 12px 48px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(192, 132, 252, 0.12),
-    inset 0 1px 0 rgba(192, 132, 252, 0.24);
+.dark .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Gradient Text — hot pink → violet → indigo ── */
-.gradient-text {
-  background: linear-gradient(135deg, #f472b6 0%, #c084fc 55%, #818cf8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-/* ── Crow Glow ── */
-.crow-glow         { box-shadow: var(--glow-feather); }
-.crow-glow-shimmer { box-shadow: var(--glow-shimmer); }
-
-/* ── Gradient Button — pink → violet → indigo ── */
-.btn-gradient {
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6366f1 100%);
-  background-size: 200% 200%;
-  background-position: 0% 50%;
-  transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.15s ease;
-}
-
-.btn-gradient:hover {
-  background-position: 100% 50%;
-  box-shadow: 0 0 28px rgba(168, 85, 247, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-gradient:active { transform: translateY(0); }
-
-/* ── Priority Left Borders — distinct colors per level ── */
-.priority-high {
-  border-left: 3px solid #f472b6;
-}
-.priority-high:hover {
-  box-shadow: -3px 0 16px rgba(244, 114, 182, 0.5), 0 4px 24px rgba(0, 0, 0, 0.4);
-}
-
-.priority-medium {
-  border-left: 3px solid #a855f7;
-}
-.priority-medium:hover {
-  box-shadow: -3px 0 16px rgba(168, 85, 247, 0.5), 0 4px 24px rgba(0, 0, 0, 0.4);
-}
-
-.priority-low {
-  border-left: 3px solid #34d399;
-}
-.priority-low:hover {
-  box-shadow: -3px 0 16px rgba(52, 211, 153, 0.45), 0 4px 24px rgba(0, 0, 0, 0.4);
-}
-
-/* ── Animations ── */
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px)  rotate(0deg); }
-  33%       { transform: translateY(-8px) rotate(1deg); }
-  66%       { transform: translateY(-4px) rotate(-0.5deg); }
-}
-
-@keyframes feather-fall {
-  0%   { transform: translateY(-10px) rotate(-10deg); opacity: 0; }
-  20%  { opacity: 1; }
-  80%  { opacity: 0.7; }
-  100% { transform: translateY(60px) rotate(15deg); opacity: 0; }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.35); }
-  50%       { box-shadow: 0 0 30px rgba(192, 132, 252, 0.7), 0 0 50px rgba(244, 114, 182, 0.25); }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes crow-bob {
-  0%, 100% { transform: translateY(0) scaleX(1); }
-  50%       { transform: translateY(-6px) scaleX(1.02); }
-}
-
-.animate-float      { animation: float 4s ease-in-out infinite; }
-.animate-crow-bob   { animation: crow-bob 3s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
-
-/* ── Input & Select crow theming ── */
-.crow-input {
-  background: var(--crow-abyss);
-  border: 1px solid var(--crow-border);
-  color: var(--crow-text);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.crow-input::placeholder { color: var(--crow-muted); }
-
-.crow-input:focus {
-  border-color: var(--crow-feather);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.28), 0 0 16px rgba(192, 132, 252, 0.18);
-}
-
-.crow-input:disabled { opacity: 0.5; cursor: not-allowed; }
-
-select option {
-  background: var(--crow-shadow);
-  color: var(--crow-text);
-}
-
-/* ── Pill filter chips ── */
-.filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: 1px solid var(--crow-border);
-  background: rgba(21, 13, 42, 0.6);
-  color: var(--crow-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.filter-pill:hover {
-  border-color: var(--crow-feather);
-  color: var(--crow-text);
-  background: rgba(192, 132, 252, 0.1);
-}
-
-.filter-pill.active {
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(168, 85, 247, 0.2));
-  border-color: var(--crow-feather);
-  color: #f0e6ff;
-  box-shadow: 0 0 14px rgba(192, 132, 252, 0.25);
-}
-
-/* ── Modal gradient top border — pink → violet → indigo ── */
+/* ── Modal gradient top border ── */
 .modal-gradient-border { position: relative; }
-
 .modal-gradient-border::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #ec4899, #a855f7, #818cf8);
+  background: linear-gradient(90deg, rgb(var(--crow-accent)), rgb(var(--crow-accent) / 0.4));
   border-radius: 16px 16px 0 0;
 }
 
-/* ── Crow silhouette background for auth — actually visible ── */
-.auth-crow-bg {
-  position: absolute;
-  right: -5%;
-  bottom: 0;
-  width: 55%;
-  max-width: 520px;
-  opacity: 0.10;
-  pointer-events: none;
-  user-select: none;
+/* ── Gradient text (used on "KaamCrow" brand in auth) ── */
+.gradient-text {
+  color: rgb(var(--crow-text));
 }
 
-/* ── Status dot ── */
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
+/* ── Crow glow (used in spinners/icons) ── */
+.crow-glow         { box-shadow: 0 0 16px rgb(var(--crow-accent) / 0.4); }
+.crow-glow-shimmer { box-shadow: 0 0 16px rgb(var(--crow-accent) / 0.3); }
+
+/* ── Primary button ── */
+.btn-gradient {
+  background: rgb(var(--crow-text));
+  color: rgb(var(--crow-bg));
+  transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
-/* ── Checkbox crow style ── */
+.btn-gradient:hover {
+  opacity: 0.85;
+  transform: translateY(-0.5px);
+  box-shadow: var(--crow-card-shadow-hover);
+}
+
+.btn-gradient:active {
+  transform: none;
+  opacity: 0.95;
+}
+
+/* ── Inputs ── */
+.crow-input {
+  background: rgb(var(--crow-surface));
+  border: 1px solid rgb(var(--crow-border));
+  color: rgb(var(--crow-text));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.crow-input::placeholder { color: rgb(var(--crow-muted)); }
+
+.crow-input:focus {
+  border-color: rgb(var(--crow-accent));
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--crow-accent) / 0.12);
+}
+
+.crow-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+select option {
+  background: rgb(var(--crow-surface));
+  color: rgb(var(--crow-text));
+}
+
+/* ── Textarea ── */
+.crow-textarea {
+  background: rgb(var(--crow-surface));
+  border: 1px solid rgb(var(--crow-border));
+  color: rgb(var(--crow-text));
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.crow-textarea::placeholder { color: rgb(var(--crow-muted)); }
+
+.crow-textarea:focus {
+  border-color: rgb(var(--crow-accent));
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--crow-accent) / 0.12);
+}
+
+/* ── Filter tabs with counts ── */
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.875rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgb(var(--crow-muted));
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  color: rgb(var(--crow-text));
+  background: rgb(var(--crow-surface2));
+}
+
+.filter-pill.active {
+  background: rgb(var(--crow-surface));
+  border-color: rgb(var(--crow-border));
+  color: rgb(var(--crow-text));
+  box-shadow: var(--crow-card-shadow);
+}
+
+/* ── Checkbox ── */
 .crow-checkbox {
   appearance: none;
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid var(--crow-border);
+  border: 1.5px solid rgb(var(--crow-border));
   background: transparent;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
 .crow-checkbox:hover {
-  border-color: var(--crow-feather);
-  box-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
+  border-color: rgb(var(--crow-accent));
 }
 
 .crow-checkbox:checked {
-  background: linear-gradient(135deg, #f472b6, #a855f7);
+  background: rgb(var(--crow-text));
   border-color: transparent;
-  box-shadow: 0 0 14px rgba(192, 132, 252, 0.6);
 }
 
 .crow-checkbox:checked::after {
@@ -278,33 +220,61 @@ select option {
   top: 50%; left: 50%;
   transform: translate(-50%, -60%) rotate(45deg);
   width: 5px; height: 8px;
-  border: 2px solid white;
+  border: 1.5px solid rgb(var(--crow-bg));
   border-top: none; border-left: none;
 }
 
-/* ── Textarea crow style ── */
-.crow-textarea {
-  background: var(--crow-abyss);
-  border: 1px solid var(--crow-border);
-  color: var(--crow-text);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  resize: vertical;
-  width: 100%;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+/* ── Status dot ── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-.crow-textarea::placeholder { color: var(--crow-muted); }
+/* ── Priority left borders ── */
+.priority-high   { border-left: 2px solid #ef4444; }
+.priority-medium { border-left: 2px solid #f59e0b; }
+.priority-low    { border-left: 2px solid #22c55e; }
 
-.crow-textarea:focus {
-  border-color: var(--crow-feather);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.25), 0 0 14px rgba(192, 132, 252, 0.12);
+/* ── Auth page crow silhouette ── */
+.auth-crow-bg {
+  position: absolute;
+  right: -5%;
+  bottom: 0;
+  width: 50%;
+  max-width: 480px;
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
 }
 
-/* ── Badge glow ── */
-.badge-glow:hover {
-  filter: brightness(1.2);
-  box-shadow: 0 0 12px currentColor;
+.dark .auth-crow-bg {
+  opacity: 0.08;
 }
+
+/* ── Animations ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes crow-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+.animate-float      { animation: float 4s ease-in-out infinite; }
+.animate-crow-bob   { animation: crow-bob 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }

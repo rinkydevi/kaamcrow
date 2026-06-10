@@ -1,14 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useTasks } from "@/hooks/useTasks";
+import { useTasks, useCreateTask } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 import { useTaskEvents } from "@/hooks/useTaskEvents";
 import { useThemeStore } from "@/store/theme";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskForm } from "@/components/tasks/TaskForm";
-import { TaskFiltersBar } from "@/components/tasks/TaskFilters";
 import { Button } from "@/components/ui/Button";
+import { CrowLogo } from "@/components/ui/CrowLogo";
 import type { Task, TaskFilters } from "@/types";
 
 const DEFAULT_FILTERS: TaskFilters = {
@@ -17,21 +17,6 @@ const DEFAULT_FILTERS: TaskFilters = {
   sort_by: "created_at",
   sort_dir: "desc",
 };
-
-function CrowLogo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className={className}>
-      <path d="M8 40 L20 33 L16 43 L24 35 L18 47 L27 37 L21 49" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      <ellipse cx="38" cy="30" rx="18" ry="11"/>
-      <path d="M22 27 Q31 14 46 21" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <circle cx="59" cy="21" r="9"/>
-      <path d="M68 19 L77 21 L68 23 Z"/>
-      <circle cx="62" cy="20" r="2.5" fill="white"/>
-      <circle cx="62.5" cy="20" r="1.2" fill="#1a1a2e"/>
-      <path d="M43 41 L41 50 M41 50 L37 54 M41 50 L41 55 M41 50 L45 54" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-}
 
 function SunIcon() {
   return (
@@ -50,10 +35,11 @@ function MoonIcon() {
   );
 }
 
-function PlusIcon() {
+function SearchIcon() {
   return (
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8" />
+      <path strokeLinecap="round" d="m21 21-4.35-4.35" />
     </svg>
   );
 }
@@ -61,14 +47,24 @@ function PlusIcon() {
 function CrowSpinner() {
   return (
     <div className="flex flex-col items-center gap-4 py-20">
-      <div className="relative flex h-16 w-16 items-center justify-center">
-        <div className="absolute inset-0 rounded-full border-2 border-crow-feather/20 animate-spin-slow" style={{ borderTopColor: "var(--crow-feather)" }} />
-        <CrowLogo className="h-8 w-8 text-crow-feather animate-crow-bob" />
+      <div className="relative flex h-14 w-14 items-center justify-center">
+        <div
+          className="absolute inset-0 rounded-full border-2 border-crow-border animate-spin-slow"
+          style={{ borderTopColor: "rgb(var(--crow-accent))" }}
+        />
+        <CrowLogo className="h-7 w-7 text-crow-feather animate-crow-bob" />
       </div>
       <p className="text-sm text-crow-muted">Gathering tasks…</p>
     </div>
   );
 }
+
+const STATUS_TABS = [
+  { value: "" as const,           label: "All" },
+  { value: "todo" as const,       label: "Todo" },
+  { value: "in_progress" as const, label: "In Progress" },
+  { value: "done" as const,       label: "Done" },
+] as const;
 
 export default function TasksPage() {
   const router = useRouter();
@@ -77,6 +73,11 @@ export default function TasksPage() {
   const [filters, setFilters] = useState<TaskFilters>(DEFAULT_FILTERS);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showForm, setShowForm] = useState(false);
+
+  /* Inline quick-add state */
+  const [quickTitle, setQuickTitle] = useState("");
+  const quickInputRef = useRef<HTMLInputElement>(null);
+  const createTask = useCreateTask();
 
   const { data, isLoading, isError } = useTasks(filters);
 
@@ -88,28 +89,53 @@ export default function TasksPage() {
 
   if (!isAuthenticated) return null;
 
+  const handleQuickAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const title = quickTitle.trim();
+    if (!title) return;
+    await createTask.mutateAsync({ title, status: "todo", priority: "medium" });
+    setQuickTitle("");
+    quickInputRef.current?.focus();
+  };
+
+  /* Counts for filter tabs (from current page data) */
+  const counts = useMemo(() => {
+    if (!data) return null;
+    const tasks = data.tasks;
+    return {
+      all:         data.total,
+      todo:        tasks.filter(t => t.status === "todo").length,
+      in_progress: tasks.filter(t => t.status === "in_progress").length,
+      done:        tasks.filter(t => t.status === "done").length,
+    };
+  }, [data]);
+
+  const activeStatus = filters.status ?? "";
+
   return (
     <div className="min-h-screen">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-20 border-b border-crow-border/60 bg-crow-void/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-crow-feather/10 border border-crow-feather/20">
-              <CrowLogo className="h-6 w-6 text-crow-feather" />
+      <header
+        className="sticky top-0 z-20 border-b border-crow-border"
+        style={{ background: "var(--crow-header-bg)", backdropFilter: "blur(12px)" }}
+      >
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <CrowLogo className="h-7 w-7 text-crow-text" />
+            <div>
+              <h1 className="text-base font-bold leading-tight text-crow-text">KaamCrow</h1>
+              <p className="text-[11px] text-crow-muted leading-none">Every task, a wing beat.</p>
             </div>
-            <span className="gradient-text text-lg font-bold tracking-tight">KaamCrow</span>
           </div>
 
-          {/* Right controls */}
           <div className="flex items-center gap-2">
-            <span className="hidden text-xs text-crow-muted sm:block truncate max-w-[180px]">
+            <span className="hidden text-xs text-crow-muted sm:block truncate max-w-[160px]">
               {user?.email}
             </span>
             <button
               onClick={toggle}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="rounded-lg p-2 text-crow-muted hover:text-crow-feather hover:bg-crow-feather/10 transition-all duration-200"
+              className="rounded-lg p-2 text-crow-muted hover:text-crow-text hover:bg-crow-shadow transition-all duration-150"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDark ? <SunIcon /> : <MoonIcon />}
@@ -122,62 +148,125 @@ export default function TasksPage() {
       </header>
 
       {/* ── Main ── */}
-      <main className="mx-auto max-w-4xl px-4 py-8">
-        {/* Page title row */}
-        <div className="mb-7 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-crow-text">My Tasks</h1>
-            {data && (
-              <span className="inline-flex items-center rounded-full bg-crow-feather/15 border border-crow-feather/25 px-3 py-0.5 text-xs font-semibold text-crow-feather">
-                {data.total} {data.total === 1 ? "task" : "tasks"}
-              </span>
-            )}
-          </div>
+      <main className="mx-auto max-w-3xl px-4 py-8 space-y-4">
+
+        {/* Inline quick-add */}
+        <form onSubmit={handleQuickAdd} className="flex gap-2">
+          <input
+            ref={quickInputRef}
+            type="text"
+            value={quickTitle}
+            onChange={e => setQuickTitle(e.target.value)}
+            placeholder="Add a new task…"
+            className="crow-input flex-1 rounded-xl px-4 py-3 text-sm"
+            disabled={createTask.isPending}
+          />
           <Button
-            onClick={() => {
-              setEditingTask(null);
-              setShowForm(true);
-            }}
-            className="gap-2 px-4 py-2"
+            type="submit"
+            loading={createTask.isPending}
+            disabled={!quickTitle.trim()}
+            className="rounded-xl px-5 py-3 text-sm whitespace-nowrap"
           >
-            <PlusIcon />
-            New Task
+            + Add Task
           </Button>
+        </form>
+
+        {/* Search */}
+        <div className="relative">
+          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-crow-muted">
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            placeholder="Search tasks…"
+            value={filters.search ?? ""}
+            onChange={e => setFilters(f => ({ ...f, search: e.target.value, page: 1 }))}
+            className="crow-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm"
+            aria-label="Search tasks"
+          />
         </div>
 
-        {/* Filters */}
-        <div className="mb-6">
-          <TaskFiltersBar filters={filters} onChange={setFilters} />
+        {/* Filter tabs + sort */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            {STATUS_TABS.map(tab => {
+              const count = counts
+                ? tab.value === ""
+                  ? counts.all
+                  : counts[tab.value as keyof typeof counts]
+                : null;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setFilters(f => ({ ...f, status: tab.value as TaskFilters["status"], page: 1 }))}
+                  className={`filter-pill ${activeStatus === tab.value ? "active" : ""}`}
+                  aria-pressed={activeStatus === tab.value}
+                >
+                  {tab.label}
+                  {count !== null && (
+                    <span className="text-[11px] text-crow-muted">({count})</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-1.5">
+            <select
+              value={filters.sort_by ?? "created_at"}
+              onChange={e => setFilters(f => ({ ...f, sort_by: e.target.value as TaskFilters["sort_by"], page: 1 }))}
+              className="crow-input rounded-lg px-3 py-1.5 text-xs cursor-pointer appearance-none pr-6"
+              style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23888'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 0.4rem center",
+                backgroundSize: "0.9rem",
+              }}
+              aria-label="Sort by"
+            >
+              <option value="created_at">Date Created</option>
+              <option value="due_date">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="title">Title</option>
+            </select>
+            <button
+              onClick={() => setFilters(f => ({ ...f, sort_dir: f.sort_dir === "desc" ? "asc" : "desc" }))}
+              className={`filter-pill px-2.5 py-1.5 text-xs ${filters.sort_dir === "asc" ? "active" : ""}`}
+              title={filters.sort_dir === "desc" ? "Newest first" : "Oldest first"}
+              aria-label="Toggle sort direction"
+            >
+              {filters.sort_dir === "desc" ? "↓" : "↑"}
+            </button>
+          </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading / Error / List */}
         {isLoading && <CrowSpinner />}
 
-        {/* Error */}
         {isError && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center text-sm text-red-400">
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-center text-sm text-red-500">
             Failed to load tasks. Please try again.
           </div>
         )}
 
-        {/* Task list + pagination */}
         {!isLoading && !isError && data && (
           <>
             <TaskList
               tasks={data.tasks}
-              onEdit={(task) => {
+              onEdit={(task: Task) => {
                 setEditingTask(task);
                 setShowForm(true);
               }}
             />
 
             {data.total_pages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-3 pt-2">
                 <Button
                   variant="secondary"
                   size="sm"
                   disabled={filters.page === 1}
-                  onClick={() => setFilters((f) => ({ ...f, page: (f.page ?? 1) - 1 }))}
+                  onClick={() => setFilters(f => ({ ...f, page: (f.page ?? 1) - 1 }))}
                 >
                   Previous
                 </Button>
@@ -188,7 +277,7 @@ export default function TasksPage() {
                   variant="secondary"
                   size="sm"
                   disabled={data.page >= data.total_pages}
-                  onClick={() => setFilters((f) => ({ ...f, page: (f.page ?? 1) + 1 }))}
+                  onClick={() => setFilters(f => ({ ...f, page: (f.page ?? 1) + 1 }))}
                 >
                   Next
                 </Button>

@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { useCreateTask, useUpdateTask } from "@/hooks/useTasks";
 import { useUploadAttachment } from "@/hooks/useAttachments";
+import { CrowLogo } from "@/components/ui/CrowLogo";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(255),
@@ -25,20 +26,6 @@ interface Props {
   onClose: () => void;
 }
 
-function CrowIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className={className}>
-      <path d="M8 40 L20 33 L16 43 L24 35 L18 47 L27 37 L21 49" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      <ellipse cx="38" cy="30" rx="18" ry="11"/>
-      <path d="M22 27 Q31 14 46 21" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      <circle cx="59" cy="21" r="9"/>
-      <path d="M68 19 L77 21 L68 23 Z"/>
-      <circle cx="62" cy="20" r="2.5" fill="white"/>
-      <circle cx="62.5" cy="20" r="1.2" fill="#1a1a2e"/>
-      <path d="M43 41 L41 50 M41 50 L37 54 M41 50 L41 55 M41 50 L45 54" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-}
 
 export function TaskForm({ task, onClose }: Props) {
   const createTask = useCreateTask();
@@ -122,8 +109,8 @@ export function TaskForm({ task, onClose }: Props) {
       <div className="glass-card modal-gradient-border relative w-full max-w-lg rounded-2xl overflow-hidden">
         {/* Modal header */}
         <div className="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-crow-border/40">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-crow-feather/10 border border-crow-feather/20 flex-shrink-0">
-            <CrowIcon className="h-6 w-6 text-crow-feather" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-crow-border flex-shrink-0">
+            <CrowLogo className="h-6 w-6 text-crow-text" />
           </div>
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-crow-text">
