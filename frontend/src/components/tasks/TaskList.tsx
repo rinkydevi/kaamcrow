@@ -3,6 +3,11 @@ import type { Task } from "@/types";
 import { TaskCard } from "./TaskCard";
 import { CrowLogo } from "@/components/ui/CrowLogo";
 
+interface Props {
+  tasks: Task[];
+  onEdit: (task: Task) => void;
+}
+
 export function TaskList({ tasks, onEdit }: Props) {
   if (tasks.length === 0) {
     return (
