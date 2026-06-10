@@ -17,28 +17,28 @@ export const STATUS_LABEL: Record<string, string> = {
   done: "Done",
 };
 
-/* Crow theme — semi-transparent pill backgrounds + matching text */
+/* Crow theme — vivid pill backgrounds matching new palette */
 export const PRIORITY_COLOR: Record<string, string> = {
-  low:    "bg-cyan-500/15 text-cyan-300 border border-cyan-500/25",
-  medium: "bg-blue-500/15 text-blue-300 border border-blue-500/25",
-  high:   "bg-violet-500/15 text-violet-300 border border-violet-500/25",
+  low:    "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+  medium: "bg-violet-500/20 text-violet-300 border border-violet-500/35",
+  high:   "bg-pink-500/20 text-pink-300 border border-pink-500/35",
 };
 
 export const STATUS_COLOR: Record<string, string> = {
-  todo:        "bg-blue-500/15 text-blue-300 border border-blue-500/25",
-  in_progress: "bg-amber-500/15 text-amber-300 border border-amber-500/25",
-  done:        "bg-teal-500/15 text-teal-300 border border-teal-500/25",
+  todo:        "bg-indigo-500/20 text-indigo-300 border border-indigo-500/35",
+  in_progress: "bg-amber-500/20 text-amber-300 border border-amber-500/35",
+  done:        "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
 };
 
 /* Dot colors matching the pill palette */
 export const PRIORITY_DOT: Record<string, string> = {
-  low:    "bg-cyan-400",
-  medium: "bg-blue-400",
-  high:   "bg-violet-400",
+  low:    "bg-emerald-400",
+  medium: "bg-violet-400",
+  high:   "bg-pink-400",
 };
 
 export const STATUS_DOT: Record<string, string> = {
-  todo:        "bg-blue-400",
+  todo:        "bg-indigo-400",
   in_progress: "bg-amber-400",
-  done:        "bg-teal-400",
+  done:        "bg-emerald-400",
 };

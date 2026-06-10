@@ -72,11 +72,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4" style={{ background: "#07070f" }}>
-      {/* Background gradient blobs */}
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4" style={{ background: "var(--crow-void)" }}>
+      {/* Background gradient blobs — actually visible */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute left-1/4 top-1/4 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-600/8 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 h-80 w-80 translate-x-1/2 translate-y-1/2 rounded-full bg-cyan-500/6 blur-3xl" />
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-purple-600/30 blur-[130px]" />
+        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-pink-500/25 blur-[120px]" />
+        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-800/20 blur-[80px]" />
       </div>
 
       {/* Large decorative crow */}
@@ -86,7 +87,7 @@ export default function LoginPage() {
       <div className="glass-card modal-gradient-border relative w-full max-w-sm rounded-2xl p-8">
         {/* Logo + title */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-crow-feather/10 border border-crow-feather/25">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-crow-feather/20 border border-crow-feather/40">
             <CrowLogo className="h-9 w-9 text-crow-feather" />
           </div>
           <h1 className="gradient-text text-3xl font-bold tracking-tight">KaamCrow</h1>

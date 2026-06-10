@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "KaamCrow — Task Management",
@@ -13,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} bg-crow-void text-crow-text`}>
+      <body className={`${spaceGrotesk.className} bg-crow-void text-crow-text antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

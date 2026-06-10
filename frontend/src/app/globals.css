@@ -3,32 +3,30 @@
 @tailwind utilities;
 
 /* ============================================
-   KAAMCROW — MIDNIGHT FEATHERS DESIGN SYSTEM
+   KAAMCROW — VIVID DUSK DESIGN SYSTEM
    ============================================ */
 
 :root {
-  /* Core Palette */
-  --crow-void: #07070f;
-  --crow-abyss: #0d0d1f;
-  --crow-shadow: #12122a;
-  --crow-border: #1e1e3f;
-  --crow-muted: #6b6b9a;
-  --crow-text: #c9c9e8;
-  --crow-feather: #8b5cf6;
-  --crow-shimmer: #06b6d4;
-  --crow-wing: #3b82f6;
-  --crow-gold: #f59e0b;
+  --crow-void:    #0d0a1e;
+  --crow-abyss:   #150d2a;
+  --crow-shadow:  #1c1238;
+  --crow-border:  #2a1956;
+  --crow-muted:   #9284c4;
+  --crow-text:    #ece8ff;
+  --crow-feather: #c084fc;
+  --crow-shimmer: #f472b6;
+  --crow-wing:    #818cf8;
+  --crow-gold:    #fbbf24;
+  --crow-mint:    #34d399;
 
-  /* Gradient stops */
-  --gradient-start: #8b5cf6;
-  --gradient-mid: #3b82f6;
-  --gradient-end: #06b6d4;
+  --gradient-start: #f472b6;
+  --gradient-mid:   #a855f7;
+  --gradient-end:   #818cf8;
 
-  /* Glow values */
-  --glow-feather: 0 0 20px rgba(139, 92, 246, 0.4);
-  --glow-shimmer: 0 0 20px rgba(6, 182, 212, 0.4);
-  --glow-wing: 0 0 20px rgba(59, 130, 246, 0.4);
-  --glow-gold: 0 0 20px rgba(245, 158, 11, 0.3);
+  --glow-feather: 0 0 24px rgba(192, 132, 252, 0.55);
+  --glow-shimmer: 0 0 24px rgba(244, 114, 182, 0.55);
+  --glow-wing:    0 0 24px rgba(129, 140, 248, 0.45);
+  --glow-gold:    0 0 24px rgba(251, 191, 36, 0.4);
 }
 
 /* ── Custom Scrollbar ── */
@@ -36,55 +34,46 @@
   scrollbar-width: thin;
   scrollbar-color: var(--crow-feather) var(--crow-abyss);
 }
-*::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-*::-webkit-scrollbar-track {
-  background: var(--crow-abyss);
-}
-*::-webkit-scrollbar-thumb {
-  background: var(--crow-feather);
-  border-radius: 99px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--crow-wing);
-}
+*::-webkit-scrollbar        { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track  { background: var(--crow-abyss); }
+*::-webkit-scrollbar-thumb  { background: var(--crow-feather); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--crow-shimmer); }
 
-/* ── Body Background — subtle feather texture via radial gradients ── */
+/* ── Body — rich purple gradient, actually visible ── */
 body {
   background-color: var(--crow-void);
   color: var(--crow-text);
   background-image:
-    radial-gradient(ellipse at 20% 10%, rgba(139, 92, 246, 0.06) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse at 10% 90%, rgba(139, 92, 246, 0.03) 0%, transparent 40%);
+    radial-gradient(ellipse at 15% 0%,  rgba(168, 85,  247, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 10%, rgba(244, 114, 182, 0.16) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 90%, rgba(129, 140, 248, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 5%  70%, rgba(192, 132, 252, 0.12) 0%, transparent 40%);
   min-height: 100vh;
 }
 
-/* ── Glass Card ── */
+/* ── Glass Card — distinctly purple-dark, not just dark ── */
 .glass-card {
-  background: rgba(13, 13, 31, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(21, 13, 42, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(192, 132, 252, 0.30);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(139, 92, 246, 0.1);
+    0 8px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(192, 132, 252, 0.07),
+    inset 0 1px 0 rgba(192, 132, 252, 0.18);
 }
 
 .glass-card:hover {
-  border-color: rgba(139, 92, 246, 0.35);
+  border-color: rgba(192, 132, 252, 0.50);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(139, 92, 246, 0.15),
-    inset 0 1px 0 rgba(139, 92, 246, 0.15);
+    0 12px 48px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(192, 132, 252, 0.12),
+    inset 0 1px 0 rgba(192, 132, 252, 0.24);
 }
 
-/* ── Gradient Text ── */
+/* ── Gradient Text — hot pink → violet → indigo ── */
 .gradient-text {
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+  background: linear-gradient(135deg, #f472b6 0%, #c084fc 55%, #818cf8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -92,17 +81,12 @@ body {
 }
 
 /* ── Crow Glow ── */
-.crow-glow {
-  box-shadow: var(--glow-feather);
-}
+.crow-glow         { box-shadow: var(--glow-feather); }
+.crow-glow-shimmer { box-shadow: var(--glow-shimmer); }
 
-.crow-glow-shimmer {
-  box-shadow: var(--glow-shimmer);
-}
-
-/* ── Gradient Button ── */
+/* ── Gradient Button — pink → violet → indigo ── */
 .btn-gradient {
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 60%, #06b6d4 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6366f1 100%);
   background-size: 200% 200%;
   background-position: 0% 50%;
   transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.15s ease;
@@ -110,44 +94,42 @@ body {
 
 .btn-gradient:hover {
   background-position: 100% 50%;
-  box-shadow: 0 0 24px rgba(139, 92, 246, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4);
   transform: translateY(-1px);
 }
 
-.btn-gradient:active {
-  transform: translateY(0);
-}
+.btn-gradient:active { transform: translateY(0); }
 
-/* ── Priority Left Borders ── */
+/* ── Priority Left Borders — distinct colors per level ── */
 .priority-high {
-  border-left: 3px solid #8b5cf6;
+  border-left: 3px solid #f472b6;
 }
 .priority-high:hover {
-  box-shadow: -3px 0 12px rgba(139, 92, 246, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: -3px 0 16px rgba(244, 114, 182, 0.5), 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 .priority-medium {
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid #a855f7;
 }
 .priority-medium:hover {
-  box-shadow: -3px 0 12px rgba(59, 130, 246, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: -3px 0 16px rgba(168, 85, 247, 0.5), 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 .priority-low {
-  border-left: 3px solid #06b6d4;
+  border-left: 3px solid #34d399;
 }
 .priority-low:hover {
-  box-shadow: -3px 0 12px rgba(6, 182, 212, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: -3px 0 16px rgba(52, 211, 153, 0.45), 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Animations ── */
 @keyframes shimmer {
   0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  100% { background-position:  200% center; }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  0%, 100% { transform: translateY(0px)  rotate(0deg); }
   33%       { transform: translateY(-8px) rotate(1deg); }
   66%       { transform: translateY(-4px) rotate(-0.5deg); }
 }
@@ -160,8 +142,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
-  50%       { box-shadow: 0 0 25px rgba(139, 92, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.2); }
+  0%, 100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.35); }
+  50%       { box-shadow: 0 0 30px rgba(192, 132, 252, 0.7), 0 0 50px rgba(244, 114, 182, 0.25); }
 }
 
 @keyframes spin-slow {
@@ -174,17 +156,9 @@ body {
   50%       { transform: translateY(-6px) scaleX(1.02); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-crow-bob {
-  animation: crow-bob 3s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2.5s ease-in-out infinite;
-}
+.animate-float      { animation: float 4s ease-in-out infinite; }
+.animate-crow-bob   { animation: crow-bob 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 
 /* ── Input & Select crow theming ── */
 .crow-input {
@@ -194,22 +168,16 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.crow-input::placeholder {
-  color: var(--crow-muted);
-}
+.crow-input::placeholder { color: var(--crow-muted); }
 
 .crow-input:focus {
   border-color: var(--crow-feather);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25), 0 0 12px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.28), 0 0 16px rgba(192, 132, 252, 0.18);
 }
 
-.crow-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.crow-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Select option background fix ── */
 select option {
   background: var(--crow-shadow);
   color: var(--crow-text);
@@ -225,7 +193,7 @@ select option {
   font-size: 0.8125rem;
   font-weight: 500;
   border: 1px solid var(--crow-border);
-  background: rgba(13, 13, 31, 0.6);
+  background: rgba(21, 13, 42, 0.6);
   color: var(--crow-muted);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -235,40 +203,36 @@ select option {
 .filter-pill:hover {
   border-color: var(--crow-feather);
   color: var(--crow-text);
-  background: rgba(139, 92, 246, 0.08);
+  background: rgba(192, 132, 252, 0.1);
 }
 
 .filter-pill.active {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.2));
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(168, 85, 247, 0.2));
   border-color: var(--crow-feather);
-  color: #e2d9fc;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+  color: #f0e6ff;
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.25);
 }
 
-/* ── Modal gradient top border ── */
-.modal-gradient-border {
-  position: relative;
-}
+/* ── Modal gradient top border — pink → violet → indigo ── */
+.modal-gradient-border { position: relative; }
 
 .modal-gradient-border::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
+  background: linear-gradient(90deg, #ec4899, #a855f7, #818cf8);
   border-radius: 16px 16px 0 0;
 }
 
-/* ── Crow silhouette background for auth ── */
+/* ── Crow silhouette background for auth — actually visible ── */
 .auth-crow-bg {
   position: absolute;
   right: -5%;
   bottom: 0;
   width: 55%;
   max-width: 520px;
-  opacity: 0.04;
+  opacity: 0.10;
   pointer-events: none;
   user-select: none;
 }
@@ -299,32 +263,23 @@ select option {
 
 .crow-checkbox:hover {
   border-color: var(--crow-feather);
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
 }
 
 .crow-checkbox:checked {
-  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  background: linear-gradient(135deg, #f472b6, #a855f7);
   border-color: transparent;
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.6);
 }
 
 .crow-checkbox:checked::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -60%) rotate(45deg);
-  width: 5px;
-  height: 8px;
+  width: 5px; height: 8px;
   border: 2px solid white;
-  border-top: none;
-  border-left: none;
-}
-
-/* ── Tooltip-like badge glow ── */
-.badge-glow:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 0 10px currentColor;
+  border-top: none; border-left: none;
 }
 
 /* ── Textarea crow style ── */
@@ -340,12 +295,16 @@ select option {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.crow-textarea::placeholder {
-  color: var(--crow-muted);
-}
+.crow-textarea::placeholder { color: var(--crow-muted); }
 
 .crow-textarea:focus {
   border-color: var(--crow-feather);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25), 0 0 12px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.25), 0 0 14px rgba(192, 132, 252, 0.12);
+}
+
+/* ── Badge glow ── */
+.badge-glow:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 12px currentColor;
 }
