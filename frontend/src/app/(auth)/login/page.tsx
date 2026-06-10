@@ -7,7 +7,26 @@ import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { CrowLogo } from "@/components/ui/CrowLogo";
+import Image from "next/image";
 import { useState } from "react";
+import { useThemeStore } from "@/store/theme";
+
+function SunIcon() {
+  return (
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5" />
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
 
 const schema = z.object({
   email: z.string().email("Invalid email"),
@@ -18,6 +37,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { isDark, toggle } = useThemeStore();
   const [error, setError] = useState("");
 
   const {
@@ -40,20 +60,35 @@ export default function LoginPage() {
       className="relative flex min-h-screen items-center justify-center p-4"
       style={{ background: "rgb(var(--crow-bg))" }}
     >
-      {/* Subtle crow silhouette */}
-      <svg
-        viewBox="0 0 400 260"
-        fill="currentColor"
-        className="auth-crow-bg text-crow-text"
+      {/* Background logo decoration — mirrored, same image as main logo */}
+      <Image
+        src="/crow-logo-light-t.png"
+        alt=""
+        width={480}
+        height={480}
+        className="auth-crow-bg block dark:hidden"
+        style={{ transform: "scaleX(-1)" }}
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
+      />
+      <Image
+        src="/crow-logo-dark.png"
+        alt=""
+        width={480}
+        height={480}
+        className="auth-crow-bg hidden dark:block"
+        style={{ transform: "scaleX(-1)" }}
+        aria-hidden="true"
+      />
+
+      {/* Theme toggle */}
+      <button
+        onClick={toggle}
+        title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        className="absolute top-4 right-4 rounded-lg p-2 text-crow-muted hover:text-crow-text hover:bg-crow-surface transition-all duration-150"
       >
-        <polygon points="72,128 144,108 144,148" />
-        <circle cx="204" cy="96" r="64" />
-        <path d="M144 152 C136 192 152 240 208 256 C256 272 312 232 320 184 C328 136 296 96 240 96 L204 144 Z" />
-        <path d="M160 192 Q216 152 288 160 Q224 200 160 224 Z" />
-        <path d="M312 192 L392 160 L400 200 L312 224 Z" />
-      </svg>
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </button>
 
       {/* Card */}
       <div className="relative w-full max-w-sm">

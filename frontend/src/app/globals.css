@@ -24,7 +24,7 @@
 
 /* ── Dark mode ── */
 .dark {
-  --crow-bg:       20  20  20;    /* #141414 */
+  --crow-bg:       23  23  23;    /* #171717 — matches logo bg */
   --crow-surface:  30  30  30;    /* #1e1e1e */
   --crow-surface2: 38  38  38;    /* #262626 */
   --crow-border:   45  45  45;    /* #2d2d2d */
@@ -32,7 +32,7 @@
   --crow-text:     240 240 240;   /* #f0f0f0 */
   --crow-accent:   168 85  247;   /* #a855f7 */
 
-  --crow-header-bg: rgba(20, 20, 20, 0.9);
+  --crow-header-bg: rgba(23, 23, 23, 0.9);
   --crow-card-shadow: 0 1px 4px rgba(0,0,0,0.3);
   --crow-card-shadow-hover: 0 4px 16px rgba(0,0,0,0.4);
 }
@@ -251,7 +251,7 @@ select option {
 }
 
 .dark .auth-crow-bg {
-  opacity: 0.08;
+  opacity: 0.18;
 }
 
 /* ── Animations ── */

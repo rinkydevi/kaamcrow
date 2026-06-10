@@ -5,10 +5,7 @@ interface Props {
   size?: number;
 }
 
-/**
- * Single transparent PNG crow. Dark mode: inverted to white via CSS filter.
- * No container — blends seamlessly with any background.
- */
+/** No container — blends seamlessly with any background. */
 export function CrowLogo({ className, size = 28 }: Props) {
   return (
     <>
@@ -21,11 +18,11 @@ export function CrowLogo({ className, size = 28 }: Props) {
         priority
       />
       <Image
-        src="/crow-logo-light-t.png"
+        src="/crow-logo.png"
         alt="KaamCrow"
         width={size}
         height={size}
-        className={`hidden dark:block brightness-0 invert ${className ?? ""}`}
+        className={`hidden dark:block ${className ?? ""}`}
         priority
       />
     </>
@@ -44,11 +41,11 @@ export function CrowBadge({ size = 48 }: { size?: number }) {
         priority
       />
       <Image
-        src="/crow-logo-light-t.png"
+        src="/crow-logo.png"
         alt="KaamCrow"
         width={size}
         height={size}
-        className="hidden dark:block object-contain brightness-0 invert"
+        className="hidden dark:block object-contain"
         priority
       />
     </>
