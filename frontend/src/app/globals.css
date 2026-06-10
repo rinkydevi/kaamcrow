@@ -245,7 +245,7 @@ select option {
   bottom: 0;
   width: 50%;
   max-width: 480px;
-  opacity: 0.05;
+  opacity: 0.12;
   pointer-events: none;
   user-select: none;
 }

@@ -5,7 +5,6 @@ interface Props {
   size?: number;
 }
 
-/** No container — blends seamlessly with any background. */
 export function CrowLogo({ className, size = 28 }: Props) {
   return (
     <>
@@ -18,7 +17,7 @@ export function CrowLogo({ className, size = 28 }: Props) {
         priority
       />
       <Image
-        src="/crow-logo.png"
+        src="/crow-logo-dark.png"
         alt="KaamCrow"
         width={size}
         height={size}
@@ -41,7 +40,7 @@ export function CrowBadge({ size = 48 }: { size?: number }) {
         priority
       />
       <Image
-        src="/crow-logo.png"
+        src="/crow-logo-dark.png"
         alt="KaamCrow"
         width={size}
         height={size}

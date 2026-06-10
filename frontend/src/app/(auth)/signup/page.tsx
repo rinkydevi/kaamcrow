@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { CrowLogo } from "@/components/ui/CrowLogo";
-import Image from "next/image";
 import { useState } from "react";
 import { useThemeStore } from "@/store/theme";
 
@@ -65,26 +64,6 @@ export default function SignupPage() {
       className="relative flex min-h-screen items-center justify-center p-4"
       style={{ background: "rgb(var(--crow-bg))" }}
     >
-      {/* Background logo decoration — mirrored, same image as main logo */}
-      <Image
-        src="/crow-logo-light-t.png"
-        alt=""
-        width={480}
-        height={480}
-        className="auth-crow-bg block dark:hidden"
-        style={{ transform: "scaleX(-1)" }}
-        aria-hidden="true"
-      />
-      <Image
-        src="/crow-logo-dark.png"
-        alt=""
-        width={480}
-        height={480}
-        className="auth-crow-bg hidden dark:block"
-        style={{ transform: "scaleX(-1)" }}
-        aria-hidden="true"
-      />
-
       {/* Theme toggle */}
       <button
         onClick={toggle}
