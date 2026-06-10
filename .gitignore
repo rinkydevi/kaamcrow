@@ -21,3 +21,10 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Playwright MCP snapshots
+.playwright-mcp/
+
+# Supabase temp
+supabase/.temp/
+frontend/supabase/

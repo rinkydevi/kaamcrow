@@ -25,6 +25,21 @@ interface Props {
   onClose: () => void;
 }
 
+function CrowIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className={className}>
+      <path d="M8 40 L20 33 L16 43 L24 35 L18 47 L27 37 L21 49" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+      <ellipse cx="38" cy="30" rx="18" ry="11"/>
+      <path d="M22 27 Q31 14 46 21" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <circle cx="59" cy="21" r="9"/>
+      <path d="M68 19 L77 21 L68 23 Z"/>
+      <circle cx="62" cy="20" r="2.5" fill="white"/>
+      <circle cx="62.5" cy="20" r="1.2" fill="#1a1a2e"/>
+      <path d="M43 41 L41 50 M41 50 L37 54 M41 50 L41 55 M41 50 L45 54" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 export function TaskForm({ task, onClose }: Props) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -97,30 +112,57 @@ export function TaskForm({ task, onClose }: Props) {
     createTask.isPending || updateTask.isPending || uploadAttachment.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900">
-        <h2 className="mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-          {isEditing ? "Edit Task" : "New Task"}
-        </h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(7, 7, 15, 0.85)", backdropFilter: "blur(8px)" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={isEditing ? "Edit task" : "New task"}
+    >
+      <div className="glass-card modal-gradient-border relative w-full max-w-lg rounded-2xl overflow-hidden">
+        {/* Modal header */}
+        <div className="flex items-center gap-3 px-6 pt-6 pb-4 border-b border-crow-border/40">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-crow-feather/10 border border-crow-feather/20 flex-shrink-0">
+            <CrowIcon className="h-6 w-6 text-crow-feather" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-crow-text">
+              {isEditing ? "Edit Task" : "New Task"}
+            </h2>
+            <p className="text-xs text-crow-muted">
+              {isEditing ? "Update the task details below." : "What needs to be done?"}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-crow-muted hover:text-crow-text hover:bg-crow-border/60 transition-all duration-200 flex-shrink-0"
+            aria-label="Close"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 px-6 py-5">
           <Input
             label="Title"
             id="title"
-            placeholder="Task title"
+            placeholder="What needs to be done?"
             error={errors.title?.message}
             {...register("title")}
           />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-crow-muted">
               Description
             </label>
             <textarea
               id="description"
               rows={3}
-              placeholder="Optional description"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              placeholder="Optional details…"
+              className="crow-textarea"
               {...register("description")}
             />
           </div>
@@ -143,15 +185,18 @@ export function TaskForm({ task, onClose }: Props) {
 
           {/* File attachments */}
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="text-xs font-semibold uppercase tracking-wider text-crow-muted">
               Attachments
             </label>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-600"
+              className="flex items-center gap-2 rounded-lg border border-dashed border-crow-border hover:border-crow-feather/50 px-3 py-2.5 text-sm text-crow-muted hover:text-crow-feather hover:bg-crow-feather/5 transition-all duration-200"
             >
-              <span>+</span> Add file (max 10 MB)
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              Add file (max 10 MB)
             </button>
             <input
               ref={fileInputRef}
@@ -161,16 +206,19 @@ export function TaskForm({ task, onClose }: Props) {
               onChange={handleFileChange}
             />
             {pendingFiles.length > 0 && (
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {pendingFiles.map((f, i) => (
-                  <li key={i} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-1.5 text-xs dark:bg-gray-800">
-                    <span className="truncate text-gray-700 dark:text-gray-300">{f.name}</span>
+                  <li key={i} className="flex items-center justify-between rounded-lg bg-crow-shadow/60 border border-crow-border/40 px-3 py-1.5 text-xs">
+                    <span className="truncate text-crow-text">{f.name}</span>
                     <button
                       type="button"
                       onClick={() => removeFile(i)}
-                      className="ml-2 text-red-400 hover:text-red-600"
+                      className="ml-2 text-crow-muted hover:text-red-400 transition-colors"
+                      aria-label={`Remove ${f.name}`}
                     >
-                      ✕
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   </li>
                 ))}
@@ -178,7 +226,8 @@ export function TaskForm({ task, onClose }: Props) {
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-1 border-t border-crow-border/30 mt-1">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>

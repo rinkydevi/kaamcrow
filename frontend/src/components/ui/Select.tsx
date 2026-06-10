@@ -8,9 +8,12 @@ interface Props extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, Props>(
   ({ className, label, error, id, children, ...props }, ref) => (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor={id}
+          className="text-xs font-semibold uppercase tracking-wider text-crow-muted"
+        >
           {label}
         </label>
       )}
@@ -18,15 +21,21 @@ export const Select = forwardRef<HTMLSelectElement, Props>(
         ref={ref}
         id={id}
         className={cn(
-          "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white",
-          error && "border-red-500",
+          "crow-input rounded-lg px-3 py-2.5 text-sm cursor-pointer appearance-none",
+          "bg-[image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b6b9a'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E\")] bg-no-repeat bg-[right_0.75rem_center] bg-[size:1.1rem] pr-8",
+          error && "border-red-500/60",
           className
         )}
         {...props}
       >
         {children}
       </select>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && (
+        <p className="text-xs text-red-400 flex items-center gap-1">
+          <span className="inline-block w-1 h-1 rounded-full bg-red-400" />
+          {error}
+        </p>
+      )}
     </div>
   )
 );

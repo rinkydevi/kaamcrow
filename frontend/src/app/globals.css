@@ -1,3 +1,351 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   KAAMCROW — MIDNIGHT FEATHERS DESIGN SYSTEM
+   ============================================ */
+
+:root {
+  /* Core Palette */
+  --crow-void: #07070f;
+  --crow-abyss: #0d0d1f;
+  --crow-shadow: #12122a;
+  --crow-border: #1e1e3f;
+  --crow-muted: #6b6b9a;
+  --crow-text: #c9c9e8;
+  --crow-feather: #8b5cf6;
+  --crow-shimmer: #06b6d4;
+  --crow-wing: #3b82f6;
+  --crow-gold: #f59e0b;
+
+  /* Gradient stops */
+  --gradient-start: #8b5cf6;
+  --gradient-mid: #3b82f6;
+  --gradient-end: #06b6d4;
+
+  /* Glow values */
+  --glow-feather: 0 0 20px rgba(139, 92, 246, 0.4);
+  --glow-shimmer: 0 0 20px rgba(6, 182, 212, 0.4);
+  --glow-wing: 0 0 20px rgba(59, 130, 246, 0.4);
+  --glow-gold: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+/* ── Custom Scrollbar ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--crow-feather) var(--crow-abyss);
+}
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--crow-abyss);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--crow-feather);
+  border-radius: 99px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--crow-wing);
+}
+
+/* ── Body Background — subtle feather texture via radial gradients ── */
+body {
+  background-color: var(--crow-void);
+  color: var(--crow-text);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(139, 92, 246, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 90%, rgba(139, 92, 246, 0.03) 0%, transparent 40%);
+  min-height: 100vh;
+}
+
+/* ── Glass Card ── */
+.glass-card {
+  background: rgba(13, 13, 31, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(139, 92, 246, 0.1);
+}
+
+.glass-card:hover {
+  border-color: rgba(139, 92, 246, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(139, 92, 246, 0.15),
+    inset 0 1px 0 rgba(139, 92, 246, 0.15);
+}
+
+/* ── Gradient Text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Crow Glow ── */
+.crow-glow {
+  box-shadow: var(--glow-feather);
+}
+
+.crow-glow-shimmer {
+  box-shadow: var(--glow-shimmer);
+}
+
+/* ── Gradient Button ── */
+.btn-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 60%, #06b6d4 100%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  transition: background-position 0.4s ease, box-shadow 0.3s ease, transform 0.15s ease;
+}
+
+.btn-gradient:hover {
+  background-position: 100% 50%;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+/* ── Priority Left Borders ── */
+.priority-high {
+  border-left: 3px solid #8b5cf6;
+}
+.priority-high:hover {
+  box-shadow: -3px 0 12px rgba(139, 92, 246, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.priority-medium {
+  border-left: 3px solid #3b82f6;
+}
+.priority-medium:hover {
+  box-shadow: -3px 0 12px rgba(59, 130, 246, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.priority-low {
+  border-left: 3px solid #06b6d4;
+}
+.priority-low:hover {
+  box-shadow: -3px 0 12px rgba(6, 182, 212, 0.4), 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Animations ── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-8px) rotate(1deg); }
+  66%       { transform: translateY(-4px) rotate(-0.5deg); }
+}
+
+@keyframes feather-fall {
+  0%   { transform: translateY(-10px) rotate(-10deg); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.7; }
+  100% { transform: translateY(60px) rotate(15deg); opacity: 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.3); }
+  50%       { box-shadow: 0 0 25px rgba(139, 92, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.2); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes crow-bob {
+  0%, 100% { transform: translateY(0) scaleX(1); }
+  50%       { transform: translateY(-6px) scaleX(1.02); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-crow-bob {
+  animation: crow-bob 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Input & Select crow theming ── */
+.crow-input {
+  background: var(--crow-abyss);
+  border: 1px solid var(--crow-border);
+  color: var(--crow-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crow-input::placeholder {
+  color: var(--crow-muted);
+}
+
+.crow-input:focus {
+  border-color: var(--crow-feather);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25), 0 0 12px rgba(139, 92, 246, 0.15);
+}
+
+.crow-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Select option background fix ── */
+select option {
+  background: var(--crow-shadow);
+  color: var(--crow-text);
+}
+
+/* ── Pill filter chips ── */
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid var(--crow-border);
+  background: rgba(13, 13, 31, 0.6);
+  color: var(--crow-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  border-color: var(--crow-feather);
+  color: var(--crow-text);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.filter-pill.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.2));
+  border-color: var(--crow-feather);
+  color: #e2d9fc;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+/* ── Modal gradient top border ── */
+.modal-gradient-border {
+  position: relative;
+}
+
+.modal-gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
+  border-radius: 16px 16px 0 0;
+}
+
+/* ── Crow silhouette background for auth ── */
+.auth-crow-bg {
+  position: absolute;
+  right: -5%;
+  bottom: 0;
+  width: 55%;
+  max-width: 520px;
+  opacity: 0.04;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Status dot ── */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Checkbox crow style ── */
+.crow-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--crow-border);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.crow-checkbox:hover {
+  border-color: var(--crow-feather);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+}
+
+.crow-checkbox:checked {
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  border-color: transparent;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.crow-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(45deg);
+  width: 5px;
+  height: 8px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+}
+
+/* ── Tooltip-like badge glow ── */
+.badge-glow:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* ── Textarea crow style ── */
+.crow-textarea {
+  background: var(--crow-abyss);
+  border: 1px solid var(--crow-border);
+  color: var(--crow-text);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  resize: vertical;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.crow-textarea::placeholder {
+  color: var(--crow-muted);
+}
+
+.crow-textarea:focus {
+  border-color: var(--crow-feather);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25), 0 0 12px rgba(139, 92, 246, 0.1);
+}
