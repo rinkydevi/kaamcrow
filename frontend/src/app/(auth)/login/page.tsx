@@ -59,8 +59,8 @@ export default function LoginPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-crow-border bg-crow-shadow">
-            <CrowLogo className="h-7 w-7 text-crow-text" />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center">
+            <CrowLogo size={48} />
           </div>
           <h1 className="text-2xl font-bold text-crow-text">KaamCrow</h1>
           <p className="mt-1.5 text-sm text-crow-muted">Every task, a wing beat.</p>

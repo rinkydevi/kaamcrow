@@ -7,7 +7,7 @@ export function TaskList({ tasks, onEdit }: Props) {
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <CrowLogo className="h-16 w-16 text-crow-muted/40 animate-float" aria-hidden="true" />
+        <CrowLogo size={64} className="opacity-40 animate-float" aria-hidden="true" />
         <p className="mt-5 text-sm font-semibold text-crow-text">No tasks yet</p>
         <p className="mt-1 text-xs text-crow-muted">The crow&apos;s perch is empty. Add one above.</p>
       </div>

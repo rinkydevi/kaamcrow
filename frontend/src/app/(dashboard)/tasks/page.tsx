@@ -121,7 +121,7 @@ export default function TasksPage() {
       >
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <CrowLogo className="h-7 w-7 text-crow-text" />
+            <CrowLogo size={28} />
             <div>
               <h1 className="text-base font-bold leading-tight text-crow-text">KaamCrow</h1>
               <p className="text-[11px] text-crow-muted leading-none">Every task, a wing beat.</p>
