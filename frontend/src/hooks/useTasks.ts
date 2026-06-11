@@ -13,6 +13,7 @@ export function useTasks(filters: TaskFilters) {
   return useQuery<TaskListResponse>({
     queryKey: ["tasks", filters],
     queryFn: () => api.get("/tasks", { params: filters }).then((r) => r.data),
+    staleTime: 30_000,
   });
 }
 

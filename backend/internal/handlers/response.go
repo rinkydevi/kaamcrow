@@ -5,6 +5,12 @@ import (
 	"net/http"
 )
 
+var errForbidden = &forbiddenError{}
+
+type forbiddenError struct{}
+
+func (e *forbiddenError) Error() string { return "forbidden" }
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

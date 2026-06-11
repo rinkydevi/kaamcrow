@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTasks, useCreateTask } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 import { useTaskEvents } from "@/hooks/useTaskEvents";
 import { useThemeStore } from "@/store/theme";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskForm } from "@/components/tasks/TaskForm";
 import { Button } from "@/components/ui/Button";
@@ -68,9 +69,11 @@ const STATUS_TABS = [
 
 export default function TasksPage() {
   const router = useRouter();
+  const storeReady = useHasHydrated();
   const { user, logout, isAuthenticated } = useAuth();
   const { isDark, toggle } = useThemeStore();
   const [filters, setFilters] = useState<TaskFilters>(DEFAULT_FILTERS);
+  const [searchInput, setSearchInput] = useState("");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -83,11 +86,19 @@ export default function TasksPage() {
 
   useTaskEvents();
 
+  // Debounce search input — avoids a fetch on every keystroke
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/login");
-  }, [isAuthenticated, router]);
+    const t = setTimeout(() => {
+      setFilters(f => ({ ...f, search: searchInput || undefined, page: 1 }));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
-  if (!isAuthenticated) return null;
+  useEffect(() => {
+    if (storeReady && !isAuthenticated) router.replace("/login");
+  }, [storeReady, isAuthenticated, router]);
+
+  if (!storeReady || !isAuthenticated) return null;
 
   const handleQuickAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,17 +109,10 @@ export default function TasksPage() {
     quickInputRef.current?.focus();
   };
 
-  /* Counts for filter tabs (from current page data) */
-  const counts = useMemo(() => {
-    if (!data) return null;
-    const tasks = data.tasks;
-    return {
-      all:         data.total,
-      todo:        tasks.filter(t => t.status === "todo").length,
-      in_progress: tasks.filter(t => t.status === "in_progress").length,
-      done:        tasks.filter(t => t.status === "done").length,
-    };
-  }, [data]);
+  // Total count for the "All" tab comes from the server; per-status counts are
+  // omitted because filtering by status changes what the server returns, making
+  // page-local counts misleading when there are multiple pages.
+  const totalCount = data?.total ?? null;
 
   const activeStatus = filters.status ?? "";
 
@@ -179,8 +183,8 @@ export default function TasksPage() {
           <input
             type="search"
             placeholder="Search tasks…"
-            value={filters.search ?? ""}
-            onChange={e => setFilters(f => ({ ...f, search: e.target.value, page: 1 }))}
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
             className="crow-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm"
             aria-label="Search tasks"
           />
@@ -189,26 +193,19 @@ export default function TasksPage() {
         {/* Filter tabs + sort */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1">
-            {STATUS_TABS.map(tab => {
-              const count = counts
-                ? tab.value === ""
-                  ? counts.all
-                  : counts[tab.value as keyof typeof counts]
-                : null;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setFilters(f => ({ ...f, status: tab.value as TaskFilters["status"], page: 1 }))}
-                  className={`filter-pill ${activeStatus === tab.value ? "active" : ""}`}
-                  aria-pressed={activeStatus === tab.value}
-                >
-                  {tab.label}
-                  {count !== null && (
-                    <span className="text-[11px] text-crow-muted">({count})</span>
-                  )}
-                </button>
-              );
-            })}
+            {STATUS_TABS.map(tab => (
+              <button
+                key={tab.value}
+                onClick={() => setFilters(f => ({ ...f, status: tab.value as TaskFilters["status"], page: 1 }))}
+                className={`filter-pill ${activeStatus === tab.value ? "active" : ""}`}
+                aria-pressed={activeStatus === tab.value}
+              >
+                {tab.label}
+                {tab.value === "" && totalCount !== null && (
+                  <span className="text-[11px] text-crow-muted">({totalCount})</span>
+                )}
+              </button>
+            ))}
           </div>
 
           {/* Sort */}

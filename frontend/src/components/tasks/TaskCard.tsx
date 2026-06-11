@@ -31,8 +31,14 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-function AttachmentRow({ att, taskId }: { att: Attachment; taskId: string }) {
-  const deleteAtt = useDeleteAttachment();
+interface AttachmentRowProps {
+  att: Attachment;
+  taskId: string;
+  onDelete: (params: { taskId: string; attachmentId: string }) => void;
+  isDeleting: boolean;
+}
+
+function AttachmentRow({ att, taskId, onDelete, isDeleting }: AttachmentRowProps) {
   const isImage = att.mime_type.startsWith("image/");
 
   return (
@@ -55,8 +61,8 @@ function AttachmentRow({ att, taskId }: { att: Attachment; taskId: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
       </a>
-      <button onClick={() => deleteAtt.mutate({ taskId, attachmentId: att.id })}
-        disabled={deleteAtt.isPending}
+      <button onClick={() => onDelete({ taskId, attachmentId: att.id })}
+        disabled={isDeleting}
         className="text-crow-muted hover:text-red-500 transition-colors"
         aria-label="Remove attachment">
         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -70,6 +76,7 @@ function AttachmentRow({ att, taskId }: { att: Attachment; taskId: string }) {
 export function TaskCard({ task, onEdit }: Props) {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const deleteAttachment = useDeleteAttachment();
   const [expanded, setExpanded] = useState(false);
   const { data: attachments } = useAttachments(expanded ? task.id : null);
 
@@ -163,7 +170,13 @@ export function TaskCard({ task, onEdit }: Props) {
               {attachments && attachments.length > 0 ? (
                 <div className="space-y-1.5">
                   {attachments.map(att => (
-                    <AttachmentRow key={att.id} att={att} taskId={task.id} />
+                    <AttachmentRow
+                      key={att.id}
+                      att={att}
+                      taskId={task.id}
+                      onDelete={deleteAttachment.mutate}
+                      isDeleting={deleteAttachment.isPending}
+                    />
                   ))}
                 </div>
               ) : (

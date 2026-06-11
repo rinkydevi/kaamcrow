@@ -14,18 +14,13 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => {
-        localStorage.setItem("token", token);
-        set({ user, token });
-      },
-      clearAuth: () => {
-        localStorage.removeItem("token");
-        set({ user: null, token: null });
-      },
+      setAuth: (user, token) => set({ user, token }),
+      clearAuth: () => set({ user: null, token: null }),
     }),
     {
       name: "auth",
       partialize: (s) => ({ user: s.user, token: s.token }),
+      skipHydration: true,
     }
   )
 );

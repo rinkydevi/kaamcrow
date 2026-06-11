@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/naveensiwach/task-management/internal/auth"
 	"github.com/naveensiwach/task-management/internal/models"
 	"github.com/naveensiwach/task-management/internal/repository"
@@ -31,20 +33,21 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existing, _ := h.users.FindByEmail(r.Context(), req.Email)
-	if existing != nil {
-		writeError(w, http.StatusConflict, "email already in use")
-		return
-	}
-
 	hash, err := auth.HashPassword(req.Password)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to hash password")
 		return
 	}
 
+	// Let the DB unique constraint be the authoritative duplicate check —
+	// avoids the TOCTOU race of FindByEmail + Create.
 	user, err := h.users.Create(r.Context(), req.Email, hash)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			writeError(w, http.StatusConflict, "email already in use")
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "failed to create user")
 		return
 	}

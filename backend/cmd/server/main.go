@@ -1,14 +1,20 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 	"github.com/naveensiwach/task-management/internal/config"
 	"github.com/naveensiwach/task-management/internal/db"
 	"github.com/naveensiwach/task-management/internal/events"
@@ -57,14 +63,16 @@ func main() {
 	})
 
 	r.Route("/api", func(r chi.Router) {
-		r.Post("/signup", authHandler.Signup)
-		r.Post("/login", authHandler.Login)
-
-		// Public file serving — filenames are UUIDs so effectively unguessable
-		r.Get("/uploads/{filename}", attachmentHandler.ServeFile)
+		// 20 requests per minute per IP on auth endpoints
+		authLimiter := httprate.LimitByIP(20, time.Minute)
+		r.With(authLimiter).Post("/signup", authHandler.Signup)
+		r.With(authLimiter).Post("/login", authHandler.Login)
 
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Authenticate(cfg.JWTSecret))
+
+			// File serving is now behind auth — ownership checked in ServeFile
+			r.Get("/uploads/{filename}", attachmentHandler.ServeFile)
 
 			r.Route("/tasks", func(r chi.Router) {
 				r.Post("/", taskHandler.Create)
@@ -81,9 +89,27 @@ func main() {
 		})
 	})
 
-	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("server listening on %s", addr)
-	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatalf("server error: %v", err)
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", cfg.Port),
+		Handler: r,
 	}
+
+	go func() {
+		log.Printf("server listening on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("shutting down...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("forced shutdown: %v", err)
+	}
+	log.Println("server stopped")
 }

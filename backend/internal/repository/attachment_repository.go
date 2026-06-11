@@ -69,6 +69,22 @@ func (r *AttachmentRepository) FindByID(ctx context.Context, id string) (*models
 	return a, nil
 }
 
+func (r *AttachmentRepository) FindByFilename(ctx context.Context, filename string) (*models.Attachment, error) {
+	a := &models.Attachment{}
+	err := r.db.QueryRow(ctx,
+		`SELECT id, task_id, user_id, filename, original_name, mime_type, size, created_at
+		 FROM attachments WHERE filename = $1`,
+		filename,
+	).Scan(&a.ID, &a.TaskID, &a.UserID, &a.Filename, &a.OriginalName, &a.MimeType, &a.Size, &a.CreatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("find attachment by filename: %w", err)
+	}
+	return a, nil
+}
+
 func (r *AttachmentRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM attachments WHERE id = $1`, id)
 	return err

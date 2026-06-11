@@ -12,8 +12,12 @@ build:
 migrate-up:
 	psql $(DATABASE_URL) -f db/migrations/000001_init.up.sql
 	psql $(DATABASE_URL) -f db/migrations/000002_extras.up.sql
+	psql $(DATABASE_URL) -f db/migrations/000003_perf.up.sql
+	psql $(DATABASE_URL) -f db/migrations/000004_trgm.up.sql
 
 migrate-down:
+	psql $(DATABASE_URL) -f db/migrations/000004_trgm.down.sql
+	psql $(DATABASE_URL) -f db/migrations/000003_perf.down.sql
 	psql $(DATABASE_URL) -f db/migrations/000002_extras.down.sql
 	psql $(DATABASE_URL) -f db/migrations/000001_init.down.sql
 

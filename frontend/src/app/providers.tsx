@@ -2,6 +2,18 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useThemeStore } from "@/store/theme";
+import { useAuthStore } from "@/store/auth";
+
+// Rehydrates both Zustand persist stores from localStorage after mount.
+// Both stores use skipHydration:true so the server render always starts from
+// the initial (empty) state, preventing an SSR/client mismatch.
+function StoreHydration() {
+  useEffect(() => {
+    useAuthStore.persist.rehydrate();
+    useThemeStore.persist.rehydrate();
+  }, []);
+  return null;
+}
 
 function ThemeApplier() {
   const { isDark } = useThemeStore();
@@ -23,6 +35,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <StoreHydration />
       <ThemeApplier />
       {children}
     </QueryClientProvider>

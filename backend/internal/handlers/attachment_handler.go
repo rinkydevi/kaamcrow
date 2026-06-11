@@ -146,12 +146,27 @@ func (h *AttachmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ServeFile requires authentication and verifies the requesting user owns the attachment.
 func (h *AttachmentHandler) ServeFile(w http.ResponseWriter, r *http.Request) {
 	filename := filepath.Base(chi.URLParam(r, "filename"))
 	if strings.Contains(filename, "..") || filename == "." {
 		writeError(w, http.StatusBadRequest, "invalid filename")
 		return
 	}
+
+	att, err := h.attachments.FindByFilename(r.Context(), filename)
+	if err != nil || att == nil {
+		writeError(w, http.StatusNotFound, "file not found")
+		return
+	}
+
+	userID := middleware.UserIDFromCtx(r.Context())
+	role := middleware.RoleFromCtx(r.Context())
+	if att.UserID != userID && role != "admin" {
+		writeError(w, http.StatusForbidden, "access denied")
+		return
+	}
+
 	http.ServeFile(w, r, filepath.Join(h.uploadsDir, filename))
 }
 

@@ -12,6 +12,6 @@ export const useThemeStore = create<ThemeState>()(
       isDark: false,
       toggle: () => set((s) => ({ isDark: !s.isDark })),
     }),
-    { name: "theme" }
+    { name: "theme", skipHydration: true }
   )
 );

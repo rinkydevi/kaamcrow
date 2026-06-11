@@ -11,6 +11,12 @@ import (
 	"github.com/naveensiwach/task-management/internal/models"
 )
 
+// ErrNotFound is returned when a task does not exist.
+var ErrNotFound = errors.New("not found")
+
+// ErrForbidden is returned when the caller does not own the task.
+var ErrForbidden = errors.New("forbidden")
+
 type TaskRepository struct {
 	db *pgxpool.Pool
 }
@@ -41,25 +47,25 @@ func (r *TaskRepository) Create(ctx context.Context, userID string, req *models.
 }
 
 func (r *TaskRepository) List(ctx context.Context, userID string, p *models.TaskListParams, adminAll bool) (*models.TaskListResponse, error) {
-	args := []interface{}{}
+	filterArgs := []interface{}{}
 	where := []string{}
 	argIdx := 1
 
 	if !adminAll {
 		where = append(where, fmt.Sprintf("user_id = $%d", argIdx))
-		args = append(args, userID)
+		filterArgs = append(filterArgs, userID)
 		argIdx++
 	}
 
 	if p.Status != "" {
 		where = append(where, fmt.Sprintf("status = $%d", argIdx))
-		args = append(args, p.Status)
+		filterArgs = append(filterArgs, p.Status)
 		argIdx++
 	}
 
 	if p.Search != "" {
 		where = append(where, fmt.Sprintf("title ILIKE $%d", argIdx))
-		args = append(args, "%"+p.Search+"%")
+		filterArgs = append(filterArgs, "%"+p.Search+"%")
 		argIdx++
 	}
 
@@ -79,34 +85,45 @@ func (r *TaskRepository) List(ctx context.Context, userID string, p *models.Task
 		sortDir = "ASC"
 	}
 
-	// priority is an enum with text values; order semantically high→medium→low
 	orderExpr := sortBy
 	if sortBy == "priority" {
 		orderExpr = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END"
 	}
 
-	var total int
-	countQuery := fmt.Sprintf(`SELECT COUNT(*) FROM tasks %s`, whereClause)
-	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
-		return nil, fmt.Errorf("count tasks: %w", err)
-	}
-
 	if p.Limit <= 0 {
 		p.Limit = 20
+	}
+	if p.Limit > 100 {
+		p.Limit = 100
 	}
 	if p.Page <= 0 {
 		p.Page = 1
 	}
 	offset := (p.Page - 1) * p.Limit
 
-	query := fmt.Sprintf(
+	// Two queries sent as one batch: the data query can early-exit after LIMIT rows
+	// (no window function), while the count query is a cheap index-only scan.
+	countQuery := "SELECT COUNT(*) FROM tasks " + whereClause
+	dataQuery := fmt.Sprintf(
 		`SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at
 		 FROM tasks %s ORDER BY %s %s LIMIT $%d OFFSET $%d`,
 		whereClause, orderExpr, sortDir, argIdx, argIdx+1,
 	)
-	args = append(args, p.Limit, offset)
+	dataArgs := append(filterArgs, p.Limit, offset)
 
-	rows, err := r.db.Query(ctx, query, args...)
+	batch := &pgx.Batch{}
+	batch.Queue(countQuery, filterArgs...)
+	batch.Queue(dataQuery, dataArgs...)
+
+	br := r.db.SendBatch(ctx, batch)
+	defer br.Close()
+
+	var total int
+	if err := br.QueryRow().Scan(&total); err != nil {
+		return nil, fmt.Errorf("count tasks: %w", err)
+	}
+
+	rows, err := br.Query()
 	if err != nil {
 		return nil, fmt.Errorf("list tasks: %w", err)
 	}
@@ -115,13 +132,19 @@ func (r *TaskRepository) List(ctx context.Context, userID string, p *models.Task
 	tasks := []*models.Task{}
 	for rows.Next() {
 		t := &models.Task{}
-		if err := rows.Scan(&t.ID, &t.UserID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		if err := rows.Scan(
+			&t.ID, &t.UserID, &t.Title, &t.Description, &t.Status, &t.Priority,
+			&t.DueDate, &t.CreatedAt, &t.UpdatedAt,
+		); err != nil {
 			return nil, fmt.Errorf("scan task: %w", err)
 		}
 		tasks = append(tasks, t)
 	}
 
-	totalPages := (total + p.Limit - 1) / p.Limit
+	totalPages := 0
+	if total > 0 {
+		totalPages = (total + p.Limit - 1) / p.Limit
+	}
 
 	return &models.TaskListResponse{
 		Tasks:      tasks,
@@ -148,7 +171,9 @@ func (r *TaskRepository) FindByID(ctx context.Context, id string) (*models.Task,
 	return task, nil
 }
 
-func (r *TaskRepository) Update(ctx context.Context, id string, req *models.UpdateTaskRequest) (*models.Task, error) {
+// UpdateOwned updates a task only if it is owned by userID (or isAdmin is true).
+// Returns ErrNotFound if the task does not exist, ErrForbidden if it exists but is not owned.
+func (r *TaskRepository) UpdateOwned(ctx context.Context, id, userID string, isAdmin bool, req *models.UpdateTaskRequest) (*models.Task, error) {
 	sets := []string{}
 	args := []interface{}{}
 	argIdx := 1
@@ -184,24 +209,50 @@ func (r *TaskRepository) Update(ctx context.Context, id string, req *models.Upda
 	}
 
 	sets = append(sets, "updated_at = NOW()")
-	args = append(args, id)
+	// WHERE id=$n AND (user_id=$m OR $k::boolean)
+	args = append(args, id, userID, isAdmin)
 
 	query := fmt.Sprintf(
-		`UPDATE tasks SET %s WHERE id = $%d
+		`UPDATE tasks SET %s WHERE id = $%d AND (user_id = $%d OR $%d::boolean)
 		 RETURNING id, user_id, title, description, status, priority, due_date, created_at, updated_at`,
-		strings.Join(sets, ", "), argIdx,
+		strings.Join(sets, ", "), argIdx, argIdx+1, argIdx+2,
 	)
 
 	task := &models.Task{}
 	err := r.db.QueryRow(ctx, query, args...).
 		Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.Status, &task.Priority, &task.DueDate, &task.CreatedAt, &task.UpdatedAt)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, r.resolveOwnershipError(ctx, id)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("update task: %w", err)
 	}
 	return task, nil
 }
 
-func (r *TaskRepository) Delete(ctx context.Context, id string) error {
-	_, err := r.db.Exec(ctx, `DELETE FROM tasks WHERE id = $1`, id)
-	return err
+// DeleteOwned deletes a task only if it is owned by userID (or isAdmin is true).
+// Returns ErrNotFound if the task does not exist, ErrForbidden if it exists but is not owned.
+func (r *TaskRepository) DeleteOwned(ctx context.Context, id, userID string, isAdmin bool) error {
+	tag, err := r.db.Exec(ctx,
+		`DELETE FROM tasks WHERE id = $1 AND (user_id = $2 OR $3::boolean)`,
+		id, userID, isAdmin,
+	)
+	if err != nil {
+		return fmt.Errorf("delete task: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return r.resolveOwnershipError(ctx, id)
+	}
+	return nil
+}
+
+// resolveOwnershipError checks whether a task exists to distinguish not-found from forbidden.
+func (r *TaskRepository) resolveOwnershipError(ctx context.Context, id string) error {
+	var exists bool
+	r.db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tasks WHERE id = $1)`, id).Scan(&exists) //nolint:errcheck
+	if exists {
+		return ErrForbidden
+	}
+	return ErrNotFound
 }

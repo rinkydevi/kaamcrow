@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -14,14 +18,32 @@ import (
 	"github.com/naveensiwach/task-management/internal/repository"
 )
 
+const dbTimeout = 5 * time.Second
+
+// TaskRepo is the subset of TaskRepository methods the handler needs.
+// Accepting an interface makes the handler unit-testable without a live DB.
+type TaskRepo interface {
+	Create(ctx context.Context, userID string, req *models.CreateTaskRequest) (*models.Task, error)
+	List(ctx context.Context, userID string, p *models.TaskListParams, adminAll bool) (*models.TaskListResponse, error)
+	FindByID(ctx context.Context, id string) (*models.Task, error)
+	UpdateOwned(ctx context.Context, id, userID string, isAdmin bool, req *models.UpdateTaskRequest) (*models.Task, error)
+	DeleteOwned(ctx context.Context, id, userID string, isAdmin bool) error
+}
+
+// ActivityRepo is the subset of ActivityRepository methods the handler needs.
+type ActivityRepo interface {
+	Log(ctx context.Context, taskID, userID string, action models.ActivityAction, oldVals, newVals interface{}) error
+	ListByTask(ctx context.Context, taskID string) ([]*models.ActivityLog, error)
+}
+
 type TaskHandler struct {
-	tasks    *repository.TaskRepository
-	activity *repository.ActivityRepository
+	tasks    TaskRepo
+	activity ActivityRepo
 	broker   *events.Broker
 	validate *validator.Validate
 }
 
-func NewTaskHandler(tasks *repository.TaskRepository, activity *repository.ActivityRepository, broker *events.Broker) *TaskHandler {
+func NewTaskHandler(tasks TaskRepo, activity ActivityRepo, broker *events.Broker) *TaskHandler {
 	return &TaskHandler{tasks: tasks, activity: activity, broker: broker, validate: validator.New()}
 }
 
@@ -36,14 +58,19 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
 	userID := middleware.UserIDFromCtx(r.Context())
-	task, err := h.tasks.Create(r.Context(), userID, &req)
+	task, err := h.tasks.Create(ctx, userID, &req)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to create task")
 		return
 	}
 
-	h.activity.Log(r.Context(), task.ID, userID, models.ActionCreated, nil, task)
+	if err := h.activity.Log(r.Context(), task.ID, userID, models.ActionCreated, nil, task); err != nil {
+		log.Printf("activity log [create %s]: %v", task.ID, err)
+	}
 	h.broker.Publish(userID, events.TaskEvent{Type: "created", Task: task})
 
 	writeJSON(w, http.StatusCreated, task)
@@ -63,11 +90,14 @@ func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
 		Limit:   limit,
 	}
 
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
 	userID := middleware.UserIDFromCtx(r.Context())
 	role := middleware.RoleFromCtx(r.Context())
 	adminAll := role == "admin" && q.Get("all") == "true"
 
-	result, err := h.tasks.List(r.Context(), userID, params, adminAll)
+	result, err := h.tasks.List(ctx, userID, params, adminAll)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to list tasks")
 		return
@@ -77,7 +107,11 @@ func (h *TaskHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	task, err := h.tasks.FindByID(r.Context(), id)
+
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
+	task, err := h.tasks.FindByID(ctx, id)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to fetch task")
 		return
@@ -86,7 +120,10 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "task not found")
 		return
 	}
-	if err := h.checkOwnership(r, task); err != nil {
+
+	userID := middleware.UserIDFromCtx(r.Context())
+	role := middleware.RoleFromCtx(r.Context())
+	if task.UserID != userID && role != "admin" {
 		writeError(w, http.StatusForbidden, "access denied")
 		return
 	}
@@ -95,17 +132,8 @@ func (h *TaskHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	task, err := h.tasks.FindByID(r.Context(), id)
-	if err != nil || task == nil {
-		writeError(w, http.StatusNotFound, "task not found")
-		return
-	}
-	if err := h.checkOwnership(r, task); err != nil {
-		writeError(w, http.StatusForbidden, "access denied")
-		return
-	}
-
-	oldTask := *task
+	userID := middleware.UserIDFromCtx(r.Context())
+	role := middleware.RoleFromCtx(r.Context())
 
 	var req models.UpdateTaskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -117,37 +145,53 @@ func (h *TaskHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updated, err := h.tasks.Update(r.Context(), id, &req)
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
+	updated, err := h.tasks.UpdateOwned(ctx, id, userID, role == "admin", &req)
 	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "task not found")
+			return
+		}
+		if errors.Is(err, repository.ErrForbidden) {
+			writeError(w, http.StatusForbidden, "access denied")
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "failed to update task")
 		return
 	}
 
-	userID := middleware.UserIDFromCtx(r.Context())
-	h.activity.Log(r.Context(), id, userID, models.ActionUpdated, &oldTask, updated)
-	h.broker.Publish(task.UserID, events.TaskEvent{Type: "updated", Task: updated})
+	if err := h.activity.Log(r.Context(), id, userID, models.ActionUpdated, nil, updated); err != nil {
+		log.Printf("activity log [update %s]: %v", id, err)
+	}
+	h.broker.Publish(updated.UserID, events.TaskEvent{Type: "updated", Task: updated})
 
 	writeJSON(w, http.StatusOK, updated)
 }
 
 func (h *TaskHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	task, err := h.tasks.FindByID(r.Context(), id)
-	if err != nil || task == nil {
-		writeError(w, http.StatusNotFound, "task not found")
-		return
-	}
-	if err := h.checkOwnership(r, task); err != nil {
-		writeError(w, http.StatusForbidden, "access denied")
-		return
-	}
+	userID := middleware.UserIDFromCtx(r.Context())
+	role := middleware.RoleFromCtx(r.Context())
 
-	if err := h.tasks.Delete(r.Context(), id); err != nil {
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
+	if err := h.tasks.DeleteOwned(ctx, id, userID, role == "admin"); err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "task not found")
+			return
+		}
+		if errors.Is(err, repository.ErrForbidden) {
+			writeError(w, http.StatusForbidden, "access denied")
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "failed to delete task")
 		return
 	}
 
-	h.broker.Publish(task.UserID, events.TaskEvent{Type: "deleted", TaskID: id})
+	h.broker.Publish(userID, events.TaskEvent{Type: "deleted", TaskID: id})
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -191,12 +235,19 @@ func (h *TaskHandler) Events(w http.ResponseWriter, r *http.Request) {
 
 func (h *TaskHandler) ListActivity(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	task, err := h.tasks.FindByID(r.Context(), id)
+
+	ctx, cancel := context.WithTimeout(r.Context(), dbTimeout)
+	defer cancel()
+
+	task, err := h.tasks.FindByID(ctx, id)
 	if err != nil || task == nil {
 		writeError(w, http.StatusNotFound, "task not found")
 		return
 	}
-	if err := h.checkOwnership(r, task); err != nil {
+
+	userID := middleware.UserIDFromCtx(r.Context())
+	role := middleware.RoleFromCtx(r.Context())
+	if task.UserID != userID && role != "admin" {
 		writeError(w, http.StatusForbidden, "access denied")
 		return
 	}
@@ -211,18 +262,3 @@ func (h *TaskHandler) ListActivity(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, logs)
 }
-
-func (h *TaskHandler) checkOwnership(r *http.Request, task *models.Task) error {
-	userID := middleware.UserIDFromCtx(r.Context())
-	role := middleware.RoleFromCtx(r.Context())
-	if task.UserID != userID && role != "admin" {
-		return errForbidden
-	}
-	return nil
-}
-
-var errForbidden = &forbiddenError{}
-
-type forbiddenError struct{}
-
-func (e *forbiddenError) Error() string { return "forbidden" }
