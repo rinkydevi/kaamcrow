@@ -4,8 +4,6 @@ A full-stack task management application built with **Go** (backend), **Next.js 
 
 **Live demo:** [kaamcrow.vercel.app](https://kaamcrow.vercel.app)
 
-**Author:** [rinkydevi](https://github.com/rinkydevi) · [github.com/rinkydevi/kaamcrow](https://github.com/rinkydevi/kaamcrow)
-
 ---
 
 ## Features
